@@ -93,5 +93,63 @@ stride는 가로, 세로 모두 2 픽셀임을 알 수 있다.
 
 결과가 [None, 6, 6, 8]인 이유는, 원래 28x28인 MNIST 이미지를 capsule layer 앞에 있는 convolutional layer에서 20x20으로 만들기 때문이다.
 
+---
+계속해서 함수들의 정의가 나오지만, 여기서는 파일에 있는 순서대로 하지 않고, 먼저 _build_net 함수에 대해 분석하겠다.
+
+```python3
+    def _build_net(self):
+        """build the graph of the network"""
+
+        # reshape for conv ops
+        with tf.name_scope('x_reshape'):
+            x_image = tf.reshape(self._x, [-1, 28, 28, 1])
+```
+
+먼저, input image의 모양을 [-1, 28, 28, 1]로 바꾼다. *(원래 모양은 [-1, 28, 28]일 것이다.)*
+
+```python3
+        # initial conv1 op
+        # 1). conv1 with kernel 9x9, stride 1, output channels 256
+        with tf.variable_scope('conv1'):
+            # specially initialize it with xavier initializer with no good reason.
+            w = tf.get_variable('w', shape=[9, 9, 1, 256], dtype=tf.float32,
+                                initializer=tf.contrib.layers.xavier_initializer()
+                                )
+            # conv op
+            conv1 = tf.nn.conv2d(x_image, w, [1, 1, 1, 1],
+                                 padding='VALID', name='conv1')
+            if cfg.USE_BIAS:
+                # bias (TODO wu) no idea if the paper uses bias or not
+                b = tf.get_variable('b', shape=[256, ], dtype=tf.float32,
+                                    initializer=self._b_initializer)
+                conv1 = tf.nn.relu(conv1 + b)
+            else:
+                conv1 = tf.nn.relu(conv1)
+
+            # update dimensions of feature map
+            self._dim = (self._dim - 9) // 1 + 1
+            assert self._dim == 20, "after conv1, dimensions of feature map" \
+                                    "should be 20x20"
+
+            # conv1 with shape [None, 20, 20, 256]
+```
+
+첫번째는 convolutional layer이다. 이 레이어의 역할은, 이미지로부터 다양한 feature를 뽑아내는 것이다.
+변수들의 형태를 보면 알겠지만, 9x9 커널을 사용하고 feature map은 256개이다. 패딩은 VALID 타입인데, 엣지를 확장하지 않는 타입이다.
+VALID 타입을 사용하고 stride는 1이기 때문에, 28x28인 이미지에 대한 컨벌루션 결과는 20x20이 된다.
+USE_BIAS라는 파라미터에 따라 bias를 쓸 수도 있고 안 쓸 수도 있도록 되어있다.
+
+get_variable 함수는 [변수 셰어링](https://stackoverflow.com/questions/35919020/whats-the-difference-of-name-scope-and-a-variable-scope-in-tensorflow?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa)
+을 위한 것인데, 실행 당시 해당하는 이름의 변수가 없으면 새로 만든다.
+
+xavier_initializer는 Xavier가 고안한 초기화방식으로 변수를 초기화하는 것을 말한다. 이 [논문](http://www.jmlr.org/proceedings/papers/v9/glorot10a/glorot10a.pdf)에 내용이 나와있다.
+
+이 convolutional layer를 지나고 나면, 데이터의 크기가 28x28에서 20x20으로 바뀐다. 따라서 self._dim을 20으로 업데이트 해준다.
+
+
+
+
+
+
 
 
