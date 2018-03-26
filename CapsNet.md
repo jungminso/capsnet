@@ -10,7 +10,7 @@ from __future__ import print_function
 ```
 
 __future__는 python 2와 python 3의 차이를 메꾸기 위해서 사용하는 모듈이다. 예를 들어 print 같은 경우 python 2에서는 키워드지만,
-python 3에서는 함수이기 때문에 어떻게 쓰느냐에 따라 결과가 다르게 나온다. [(참조)](http://www.hanbit.co.kr/network/category/category_view.html?cms_code=CMS9324226566)
+python 3에서는 함수이기 때문에 어떻게 쓰느냐에 따라 결과가 다르게 나온다 [(참조)].(http://www.hanbit.co.kr/network/category/category_view.html?cms_code=CMS9324226566)
 __future__를 사용해주면 python 2,3 어디에서 쓰든지 같은 결과를 얻을 수 있다.
 
 ```python3
@@ -91,9 +91,7 @@ CapsNet이라는 클래스 및 멤버변수 정의.
 w, cap 등의 변수 정의를 보면, capsule에서 사용하는 convolution은 9x9 커널을 사용하고, 엣지를 늘리지 않는 'VALID' 타입 패딩을 사용하며,
 stride는 가로, 세로 모두 2 픽셀임을 알 수 있다. 
 
-결과가 [None, 6, 6, 8]인 이유는, 원래 28x28인 MNIST 이미지에서 숫자가 있는 부분은 20x20이고, 이 부분만 사용하기 때문인 것 같다.
-(kernel이 9x9이고 stride는 2이고 엣지를 확장하지 않았을 때 convolution의 결과가 6개이려면 가로와 세로의 길이가 20픽셀이어야 한다.)
-마지막 8은 feature map의 개수와 같은 것이라고 보면 된다.
+결과가 [None, 6, 6, 8]인 이유는, 원래 28x28인 MNIST 이미지를 capsule layer 앞에 있는 convolutional layer에서 20x20으로 만들기 때문이다.
 
 
 
